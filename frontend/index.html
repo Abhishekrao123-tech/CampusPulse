@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CampusPulse — College Event Management</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <!-- ═══════════════════════════════════════
+       LOADING SPINNER
+  ═══════════════════════════════════════ -->
+    <div id="loadingSpinner" class="loading-overlay">
+        <div class="spinner-ring"></div>
+        <p class="spinner-label">Loading CampusPulse…</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+       TOAST CONTAINER
+  ═══════════════════════════════════════ -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- ═══════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════ -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-inner">
+            <a href="#" class="nav-brand" id="navBrand">
+                <span class="brand-icon">⚡</span>
+                <span>Campus<strong>Pulse</strong></span>
+            </a>
+
+            <div class="nav-links" id="navLinks">
+                <a href="#" class="nav-link active" data-view="publicView">Events</a>
+                <a href="#" class="nav-link" data-view="studentDashboard" id="navStudent" style="display:none">My
+                    Dashboard</a>
+                <a href="#" class="nav-link" data-view="adminDashboard" id="navAdmin" style="display:none">Admin</a>
+            </div>
+
+            <div class="nav-actions">
+                <button class="btn btn-ghost" id="themeToggleBtn"
+                    style="padding: 6px; border-radius: 50%; font-size: 1.1rem; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--clr-border2);"
+                    title="Toggle Theme">🌙</button>
+                <!-- Guest actions -->
+                <div id="guestActions">
+                    <button class="btn btn-ghost" id="openLoginBtn">Log In</button>
+                    <button class="btn btn-primary" id="openSignupBtn">Sign Up</button>
+                </div>
+                <!-- Logged in actions -->
+                <div id="userActions" style="display:none">
+                    <div class="user-chip" id="userChip">
+                        <div class="user-avatar" id="userAvatar">S</div>
+                        <span id="userNameDisplay">Student</span>
+                        <span class="chevron">▾</span>
+                        <div class="user-dropdown" id="userDropdown">
+                            <a href="#" class="dropdown-item" data-view="studentDashboard" id="ddStudent">My
+                                Dashboard</a>
+                            <a href="#" class="dropdown-item" data-view="adminDashboard" id="ddAdmin"
+                                style="display:none">Admin Panel</a>
+                            <hr class="dropdown-divider" />
+                            <a href="#" class="dropdown-item danger" id="logoutBtn">Log Out</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="nav-hamburger" id="navHamburger" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════════════════════════
+       PUBLIC VIEW
+  ═══════════════════════════════════════ -->
+    <div id="publicView" class="view active">
+
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-bg-orbs">
+                <div class="orb orb-1"></div>
+                <div class="orb orb-2"></div>
+                <div class="orb orb-3"></div>
+            </div>
+            <div class="hero-content">
+                <div class="hero-badge">🎓 Your Campus. Your Events.</div>
+                <h1 class="hero-title">
+                    Discover &amp; Join<br />
+                    <span class="gradient-text">Campus Events</span>
+                </h1>
+                <p class="hero-sub">Workshops, hackathons, fests, and more — all in one place. Stay connected with
+                    what's happening at your college.</p>
+                <div class="hero-search-wrap">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="heroSearch" placeholder="Search events by name, club, or keyword…"
+                            autocomplete="off" />
+                        <button class="btn btn-primary search-btn" id="heroSearchBtn">Search</button>
+                    </div>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat"><span class="stat-num" id="heroTotalEvents">0</span><span
+                            class="stat-lbl">Events</span></div>
+                    <div class="hero-stat"><span class="stat-num" id="heroUpcoming">0</span><span
+                            class="stat-lbl">Upcoming</span></div>
+                    <div class="hero-stat"><span class="stat-num" id="heroDepts">0</span><span
+                            class="stat-lbl">Departments</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FILTERS + EVENTS -->
+        <section class="events-section" id="eventsSection">
+            <div class="container">
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label class="filter-label">Department</label>
+                        <select class="filter-select" id="deptFilter">
+                            <option value="">All Departments</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Category</label>
+                        <select class="filter-select" id="catFilter">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Status</label>
+                        <select class="filter-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="upcoming">Upcoming</option>
+                            <option value="ongoing">Ongoing</option>
+                            <option value="expired">Expired</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" id="clearFiltersBtn">Clear Filters</button>
+                </div>
+
+                <div class="events-header">
+                    <h2 class="section-title">All Events <span class="events-count" id="eventsCount">0</span></h2>
+                    <div class="view-toggle">
+                        <button class="view-btn active" id="gridViewBtn" title="Grid View">⊞</button>
+                        <button class="view-btn" id="listViewBtn" title="List View">☰</button>
+                    </div>
+                </div>
+
+                <div class="events-grid" id="eventsGrid">
+                    <!-- Cards injected by JS -->
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="eventsEmpty" style="display:none">
+                    <div class="empty-icon">🎭</div>
+                    <h3>No events found</h3>
+                    <p>Try adjusting your filters or search query.</p>
+                    <button class="btn btn-primary" id="emptyResetBtn">Reset Filters</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <div class="container footer-inner">
+                <div class="footer-brand">
+                    <span class="brand-icon">⚡</span>
+                    <span>Campus<strong>Pulse</strong></span>
+                    <p>The heartbeat of your campus.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-col">
+                        <h4>Platform</h4>
+                        <a href="#" id="footerBrowse">Browse Events</a>
+                        <a href="#" id="footerDepts">Departments</a>
+                        <a href="#" id="footerCalendar">Calendar</a>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Account</h4>
+                        <a href="#" id="footerLogin">Log In</a>
+                        <a href="#" id="footerSignup">Sign Up</a>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Info</h4>
+                        <a href="#" id="footerAbout">About</a>
+                        <a href="#" id="footerPrivacy">Privacy</a>
+                        <a href="#" id="footerContact">Contact</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 CampusPulse. Built for students.</p>
+                <p>Developed by Abhishek Rao</p>
+            </div>
+        </footer>
+    </div><!-- /publicView -->
+
+
+    <!-- ═══════════════════════════════════════
+       STUDENT DASHBOARD VIEW
+  ═══════════════════════════════════════ -->
+    <div id="studentDashboard" class="view" style="display:none">
+        <div class="dashboard-layout">
+
+            <!-- Sidebar -->
+            <aside class="sidebar" id="studentSidebar">
+                <div class="sidebar-brand">
+                    <span class="brand-icon">⚡</span>
+                    <span>Campus<strong>Pulse</strong></span>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="#" class="sidebar-link active" data-tab="sdOverview">
+                        <span class="sidebar-icon">📊</span> Overview
+                    </a>
+                    <a href="#" class="sidebar-link" data-tab="sdMyEvents">
+                        <span class="sidebar-icon">📅</span> My Events
+                    </a>
+                    <a href="#" class="sidebar-link" data-tab="sdProfile">
+                        <span class="sidebar-icon">👤</span> Profile
+                    </a>
+                    <a href="#" class="sidebar-link" data-view="publicView">
+                        <span class="sidebar-icon">🔍</span> Browse Events
+                    </a>
+                </nav>
+                <div class="sidebar-footer">
+                    <button class="btn btn-ghost sidebar-logout" id="studentLogout">← Log Out</button>
+                </div>
+            </aside>
+
+            <!-- Main content -->
+            <main class="dashboard-main">
+                <div class="dashboard-topbar">
+                    <div>
+                        <h1 class="dash-title" id="studentWelcome">Welcome back!</h1>
+                        <p class="dash-sub">Here's what's happening on campus.</p>
+                    </div>
+                    <button class="sidebar-toggle-btn" id="studentSidebarToggle">☰</button>
+                </div>
+
+                <!-- Overview Tab -->
+                <div class="dash-tab active" id="sdOverview">
+                    <div class="stats-grid">
+                        <div class="stat-card glass">
+                            <div class="stat-card-icon purple">📋</div>
+                            <div class="stat-card-info">
+                                <span class="stat-card-num" id="sdTotalReg">0</span>
+                                <span class="stat-card-lbl">Total Registrations</span>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <div class="stat-card-icon blue">🗓️</div>
+                            <div class="stat-card-info">
+                                <span class="stat-card-num" id="sdUpcoming">0</span>
+                                <span class="stat-card-lbl">Upcoming Events</span>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <div class="stat-card-icon green">✅</div>
+                            <div class="stat-card-info">
+                                <span class="stat-card-num" id="sdCompleted">0</span>
+                                <span class="stat-card-lbl">Completed Events</span>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <div class="stat-card-icon orange">🔥</div>
+                            <div class="stat-card-info">
+                                <span class="stat-card-num" id="sdOngoing">0</span>
+                                <span class="stat-card-lbl">Ongoing Now</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dash-section">
+                        <h2 class="dash-section-title">Upcoming Registered Events</h2>
+                        <div id="sdUpcomingList" class="events-mini-list">
+                            <!-- mini cards injected -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Events Tab -->
+                <div class="dash-tab" id="sdMyEvents" style="display:none">
+                    <div class="dash-section">
+                        <h2 class="dash-section-title">My Registered Events</h2>
+                        <div class="table-wrap glass">
+                            <table class="data-table" id="myEventsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Event</th>
+                                        <th>Department</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="myEventsBody">
+                                    <!-- rows injected -->
+                                </tbody>
+                            </table>
+                            <div class="table-empty" id="myEventsEmpty" style="display:none">
+                                <div class="empty-icon">📭</div>
+                                <p>You haven't registered for any events yet.</p>
+                                <button class="btn btn-primary" data-view="publicView">Browse Events</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Tab -->
+                <div class="dash-tab" id="sdProfile" style="display:none">
+                    <div class="profile-card glass">
+                        <div class="profile-header">
+                            <div class="profile-avatar-lg" id="profileAvatarLg">S</div>
+                            <div class="profile-meta">
+                                <h2 id="profileName">Student Name</h2>
+                                <p id="profileEmail">student@campus.edu</p>
+                                <span class="role-badge student">Student</span>
+                            </div>
+                        </div>
+                        <div class="profile-details">
+                            <div class="profile-field">
+                                <label>Full Name</label>
+                                <input type="text" class="input-field" id="profileNameInput"
+                                    placeholder="Your full name" />
+                            </div>
+                            <div class="profile-field">
+                                <label>Email</label>
+                                <input type="email" class="input-field" id="profileEmailInput"
+                                    placeholder="your@email.com" disabled />
+                            </div>
+                            <div class="profile-field">
+                                <label>Department</label>
+                                <input type="text" class="input-field" id="profileDeptInput"
+                                    placeholder="e.g. Computer Science" />
+                            </div>
+                            <div class="profile-field">
+                                <label>Year</label>
+                                <select class="input-field" id="profileYearInput">
+                                    <option value="1">1st Year</option>
+                                    <option value="2">2nd Year</option>
+                                    <option value="3">3rd Year</option>
+                                    <option value="4">4th Year</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" id="saveProfileBtn">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div><!-- /studentDashboard -->
+
+
+    <!-- ═══════════════════════════════════════
+       ADMIN DASHBOARD VIEW
+  ═══════════════════════════════════════ -->
+    <div id="adminDashboard" class="view" style="display:none">
+        <div class="dashboard-layout">
+
+            <!-- Admin Sidebar -->
+            <aside class="sidebar" id="adminSidebar">
+                <div class="sidebar-brand">
+                    <span class="brand-icon">⚡</span>
+                    <span>Admin</span>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="#" class="sidebar-link active" data-tab="adOverview">
+                        <span class="sidebar-icon">📊</span> Overview
+                    </a>
+                    <a href="#" class="sidebar-link" data-tab="adEvents">
+                        <span class="sidebar-icon">📅</span> Events
+                    </a>
+                    <a href="#" class="sidebar-link" data-tab="adRegistrations">
+                        <span class="sidebar-icon">📋</span> Registrations
+                    </a>
+                    <a href="#" class="sidebar-link" data-tab="adAnalytics">
+                        <span class="sidebar-icon">📈</span> Analytics
+                    </a>
+                    <a href="#" class="sidebar-link" data-view="publicView">
+                        <span class="sidebar-icon">🌐</span> Public View
+                    </a>
+                </nav>
+                <div class="sidebar-footer">
+                    <button class="btn btn-ghost sidebar-logout" id="adminLogout">← Log Out</button>
+                </div>
+            </aside>
+
+            <!-- Admin Main -->
+            <main class="dashboard-main">
+                <div class="dashboard-topbar">
+                    <div>
+                        <h1 class="dash-title">Admin Dashboard</h1>
+                        <p class="dash-sub">Manage events, registrations, and analytics.</p>
+                    </div>
+                    <div style="display:flex;gap:12px;align-items:center;">
+                        <button class="btn btn-primary" id="createEventBtn">+ Create Event</button>
+                        <button class="sidebar-toggle-btn" id="adminSidebarToggle">☰</button>
+                    </div>
+                </div>
+
+                <!-- Overview Tab -->
+                <div class="dash-tab active" id="adOverview">
+                    <div class="stats-grid">
+                        <div class="stat-card glass">
+                            <div class="stat-card-icon purple">📅</div>
+                            <div class="stat-card-info">
+                                <span class="stat-card-num" id="adTotalEvents">0</span>
+                                <span class="stat-card-lbl">Total Events</span>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <div class="stat-card-icon blue">🗓️</div>
+                            <div class="stat-card-info">
+                                <span class="stat-card-num" id="adUpcoming">0</span>
+                                <span class="stat-card-lbl">Upcoming</span>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <div class="stat-card-icon green">👥</div>
+                            <div class="stat-card-info">
+                                <span class="stat-card-num" id="adTotalRegs">0</span>
+                                <span class="stat-card-lbl">Total Registrations</span>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <div class="stat-card-icon orange">🏛️</div>
+                            <div class="stat-card-info">
+                                <span class="stat-card-num" id="adActiveDepts">0</span>
+                                <span class="stat-card-lbl">Active Depts</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dash-section">
+                        <h2 class="dash-section-title">Recent Events</h2>
+                        <div class="table-wrap glass">
+                            <table class="data-table" id="recentEventsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Event</th>
+                                        <th>Dept</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Registrations</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentEventsBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Events Tab -->
+                <div class="dash-tab" id="adEvents" style="display:none">
+                    <div class="dash-section">
+                        <div class="section-topbar">
+                            <h2 class="dash-section-title">All Events</h2>
+                            <button class="btn btn-primary btn-sm" id="createEventBtn2">+ Add Event</button>
+                        </div>
+                        <div class="table-wrap glass">
+                            <table class="data-table" id="adminEventsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Event</th>
+                                        <th>Department</th>
+                                        <th>Category</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Capacity</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminEventsBody"></tbody>
+                            </table>
+                            <div class="table-empty" id="adminEventsEmpty" style="display:none">
+                                <div class="empty-icon">📭</div>
+                                <p>No events yet. Create one!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registrations Tab -->
+                <div class="dash-tab" id="adRegistrations" style="display:none">
+                    <div class="dash-section">
+                        <h2 class="dash-section-title">All Registrations</h2>
+                        <div class="table-wrap glass">
+                            <table class="data-table" id="adminRegsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Email</th>
+                                        <th>Event</th>
+                                        <th>Dept</th>
+                                        <th>Registered On</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminRegsBody"></tbody>
+                            </table>
+                            <div class="table-empty" id="adminRegsEmpty" style="display:none">
+                                <div class="empty-icon">📭</div>
+                                <p>No registrations yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Tab -->
+                <div class="dash-tab" id="adAnalytics" style="display:none">
+                    <div class="stats-grid">
+                        <div class="stat-card glass">
+                            <div class="stat-card-icon purple">📊</div>
+                            <div class="stat-card-info">
+                                <span class="stat-card-num" id="anAvgReg">0</span>
+                                <span class="stat-card-lbl">Avg Registrations/Event</span>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <div class="stat-card-icon blue">🏆</div>
+                            <div class="stat-card-info">
+                                <span class="stat-card-num" id="anTopCat">—</span>
+                                <span class="stat-card-lbl">Top Category</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analytics-grid">
+                        <div class="chart-card glass">
+                            <h3 class="chart-title">Events by Department</h3>
+                            <div class="chart-placeholder" id="deptChart">
+                                <!-- bar chart injected -->
+                            </div>
+                        </div>
+                        <div class="chart-card glass">
+                            <h3 class="chart-title">Registrations per Event</h3>
+                            <div class="chart-placeholder" id="regsChart">
+                                <!-- bar chart injected -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div><!-- /adminDashboard -->
+
+
+    <!-- ═══════════════════════════════════════
+       MODALS
+  ═══════════════════════════════════════ -->
+
+    <!-- Event Details Modal -->
+    <div class="modal-overlay" id="eventDetailsModal">
+        <div class="modal glass large">
+            <button class="modal-close" data-close="eventDetailsModal">✕</button>
+            <div class="modal-event-header">
+                <div class="event-modal-banner" id="modalBanner"></div>
+                <div class="event-modal-meta"
+                    style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
+                    <div style="flex:1;">
+                        <span class="event-cat-badge" id="modalCat">Category</span>
+                        <h2 id="modalTitle" style="margin-top: 5px;">Event Title</h2>
+                        <p id="modalDesc">Description</p>
+                    </div>
+                    <button class="btn btn-ghost" id="modalBookmarkBtn"
+                        style="font-size:0.875rem; padding:6px 12px; margin-left:12px; border-radius:var(--r-sm);"
+                        title="Bookmark Event">
+                        ☆ Bookmark
+                    </button>
+                </div>
+            </div>
+            <div class="modal-event-details">
+                <div class="event-detail-item"><span class="detail-icon">📅</span><span id="modalDate">—</span></div>
+                <div class="event-detail-item"><span class="detail-icon">🕐</span><span id="modalTime">—</span></div>
+                <div class="event-detail-item"><span class="detail-icon">📍</span><span id="modalVenue">—</span></div>
+                <div class="event-detail-item"><span class="detail-icon">🏛️</span><span id="modalDept">—</span></div>
+                <div class="event-detail-item"><span class="detail-icon">👥</span><span id="modalCapacity">—</span>
+                </div>
+                <div class="event-detail-item"><span class="detail-icon">🎯</span><span id="modalOrganizer">—</span>
+                </div>
+            </div>
+            <div class="modal-actions" id="modalActions">
+                <button class="btn btn-primary btn-lg" id="modalRegisterBtn">Register Now</button>
+            </div>
+
+            <!-- QR code and Ticket section (Bonus Feature) -->
+            <div id="modalTicketSection"
+                style="display:none; text-align:center; padding: 20px; margin-top: 24px; background: rgba(255,255,255,0.02); border-radius: var(--r-md); border: 1px dashed var(--clr-border);">
+                <h3 style="font-size: 1rem; color: var(--clr-purple-l); margin-bottom: 4px;">🎫 Admission Ticket</h3>
+                <p style="font-size: 0.8rem; color: var(--clr-text-muted); margin-bottom: 12px;">Present this ticket or
+                    QR code at the venue for check-in.</p>
+                <div id="modalTicketQr"
+                    style="margin-bottom: 8px; display: flex; justify-content: center; background-color: white; width: 140px; height: 140px; margin: 0 auto 12px; padding: 6px; border-radius: var(--r-sm);">
+                    <!-- Canvas/Img injected by JS -->
+                </div>
+                <p style="font-size: 0.95rem; font-weight: bold; letter-spacing: 2px; color: var(--clr-green); margin-bottom: 12px;"
+                    id="modalTicketCode">TKT-XXXX</p>
+
+                <div id="modalCertificateSection"
+                    style="display: none; margin-top: 14px; border-top: 1px solid var(--clr-border2); padding-top: 12px;">
+                    <span style="color:var(--clr-green); font-size:0.85rem; display:block; margin-bottom: 8px;">🎓
+                        Attendance marked! Your completion certificate is available.</span>
+                    <a href="#" target="_blank" class="btn btn-primary btn-sm" id="modalDownloadCertBtn">Print
+                        Completion Certificate</a>
+                </div>
+            </div>
+
+            <!-- Comments Section (Bonus Feature) -->
+            <hr style="border: none; border-top: 1px solid var(--clr-border2); margin: 24px 0;" />
+            <div class="event-comments-section">
+                <h3 style="font-size: 1.05rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">💬
+                    Comments <span class="badge-comments" id="modalCommentsCount"
+                        style="font-size:0.75rem; padding: 2px 8px; background: rgba(168,85,247,0.15); border-radius: 99px; color: var(--clr-purple-l)">0</span>
+                </h3>
+                <div id="modalCommentsList"
+                    style="max-height: 180px; overflow-y: auto; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; padding-right: 6px;">
+                    <!-- Comments injected by JS -->
+                </div>
+                <div id="commentForm" style="display: none; align-items: center; gap: 10px;">
+                    <input type="text" id="commentInput" class="input-field" placeholder="Add a comment…"
+                        style="flex:1;" />
+                    <button class="btn btn-primary" id="submitCommentBtn">Post</button>
+                </div>
+                <p id="commentLoginHint" style="font-size:0.8rem; color:var(--clr-text-muted); text-align:center;">
+                    Please <a href="#" class="link-text" id="commentLoginLink">log in</a> to post comments.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal glass auth-modal">
+            <button class="modal-close" data-close="loginModal">✕</button>
+            <div class="auth-brand">⚡ CampusPulse</div>
+            <h2>Welcome back</h2>
+            <p class="auth-sub">Log in to your account</p>
+            <div class="form-field">
+                <label>Email</label>
+                <input type="email" class="input-field" id="loginEmail" placeholder="you@campus.edu" />
+            </div>
+            <div class="form-field">
+                <label>Password</label>
+                <input type="password" class="input-field" id="loginPassword" placeholder="••••••••" />
+            </div>
+            <div class="auth-extras">
+                <label class="checkbox-wrap">
+                    <input type="checkbox" id="rememberMe" /> Remember me
+                </label>
+                <a href="#" class="link-text" id="openForgotBtn">Forgot password?</a>
+            </div>
+            <button class="btn btn-primary full-width" id="loginSubmitBtn">Log In</button>
+            <p class="auth-switch">Don't have an account? <a href="#" class="link-text" id="switchToSignup">Sign up</a>
+            </p>
+            <!-- Demo credentials hint -->
+            <div class="demo-creds">
+                <p>Demo: <code>student@campus.edu</code> / <code>password</code></p>
+                <p>Admin: <code>admin@campus.edu</code> / <code>admin123</code></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal glass auth-modal">
+            <button class="modal-close" data-close="signupModal">✕</button>
+            <div class="auth-brand">⚡ CampusPulse</div>
+            <h2>Create account</h2>
+            <p class="auth-sub">Join your campus community</p>
+            <div class="form-row">
+                <div class="form-field">
+                    <label>First Name</label>
+                    <input type="text" class="input-field" id="signupFirst" placeholder="Alex" />
+                </div>
+                <div class="form-field">
+                    <label>Last Name</label>
+                    <input type="text" class="input-field" id="signupLast" placeholder="Smith" />
+                </div>
+            </div>
+            <div class="form-field">
+                <label>Email</label>
+                <input type="email" class="input-field" id="signupEmail" placeholder="you@campus.edu" />
+            </div>
+            <div class="form-field">
+                <label>Department</label>
+                <select class="input-field" id="signupDept">
+                    <option value="">Select Department</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label>Password</label>
+                <input type="password" class="input-field" id="signupPass" placeholder="Min 8 characters" />
+            </div>
+            <div class="form-field">
+                <label>Confirm Password</label>
+                <input type="password" class="input-field" id="signupConfirm" placeholder="Repeat password" />
+            </div>
+            <button class="btn btn-primary full-width" id="signupSubmitBtn">Create Account</button>
+            <p class="auth-switch">Already have an account? <a href="#" class="link-text" id="switchToLogin">Log in</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotModal">
+        <div class="modal glass auth-modal">
+            <button class="modal-close" data-close="forgotModal">✕</button>
+            <div class="auth-brand">⚡ CampusPulse</div>
+            <h2>Reset password</h2>
+            <p class="auth-sub">Enter your email and we'll send you a reset link.</p>
+            <div class="form-field">
+                <label>Email</label>
+                <input type="email" class="input-field" id="forgotEmail" placeholder="you@campus.edu" />
+            </div>
+            <button class="btn btn-primary full-width" id="forgotSubmitBtn">Send Reset Link</button>
+            <p class="auth-switch"><a href="#" class="link-text" id="backToLogin">← Back to login</a></p>
+        </div>
+    </div>
+
+    <!-- Create / Edit Event Modal -->
+    <div class="modal-overlay" id="eventFormModal">
+        <div class="modal glass large">
+            <button class="modal-close" data-close="eventFormModal">✕</button>
+            <h2 id="eventFormTitle">Create Event</h2>
+            <p class="modal-sub">Fill in the details for the event.</p>
+            <input type="hidden" id="editingEventId" />
+            <div class="form-row">
+                <div class="form-field">
+                    <label>Event Name *</label>
+                    <input type="text" class="input-field" id="efName" placeholder="e.g. TechFest 2025" />
+                </div>
+                <div class="form-field">
+                    <label>Department *</label>
+                    <select class="input-field" id="efDept"></select>
+                </div>
+            </div>
+            <div class="form-field">
+                <label>Description *</label>
+                <textarea class="input-field" id="efDesc" rows="3"
+                    placeholder="Brief description of the event…"></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label>Category *</label>
+                    <select class="input-field" id="efCat"></select>
+                </div>
+                <div class="form-field">
+                    <label>Organizer</label>
+                    <input type="text" class="input-field" id="efOrganizer" placeholder="Club or committee name" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label>Date *</label>
+                    <input type="date" class="input-field" id="efDate" />
+                </div>
+                <div class="form-field">
+                    <label>Time *</label>
+                    <input type="time" class="input-field" id="efTime" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label>Venue *</label>
+                    <input type="text" class="input-field" id="efVenue" placeholder="e.g. Main Auditorium" />
+                </div>
+                <div class="form-field">
+                    <label>Capacity</label>
+                    <input type="number" class="input-field" id="efCapacity" placeholder="e.g. 200" min="1" />
+                </div>
+            </div>
+            <div class="form-field">
+                <label>Banner Color (accent)</label>
+                <input type="color" class="input-field color-input" id="efColor" value="#a855f7" />
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" data-close="eventFormModal">Cancel</button>
+                <button class="btn btn-primary" id="eventFormSubmit">Create Event</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirm Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal glass small">
+            <button class="modal-close" data-close="deleteModal">✕</button>
+            <div class="delete-icon">🗑️</div>
+            <h2>Delete Event?</h2>
+            <p id="deleteEventName" class="modal-sub">Are you sure you want to delete this event? This action cannot be
+                undone.</p>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" data-close="deleteModal">Cancel</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">Delete Event</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="services/api.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
