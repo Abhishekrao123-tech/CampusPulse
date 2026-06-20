@@ -1,7 +1,7 @@
 -- CampusPulse Database Schema
-CREATE DATABASE IF NOT EXISTS campuspulse;
-USE campuspulse;
-
+-- CREATE DATABASE IF NOT EXISTS campuspulse;
+-- USE campuspulse;
+USE railway;
 -- 1. Users Table
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,

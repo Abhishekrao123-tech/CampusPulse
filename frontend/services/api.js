@@ -8,11 +8,10 @@
 
 const BACKEND_URL =
   localStorage.getItem("cp_backend_url") ||
-  ((window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-    ? (window.location.port === "5050" || window.location.port === "5000"
-        ? `${window.location.protocol}//${window.location.hostname}:${window.location.port}`
-        : "http://localhost:5050")
-    : window.location.origin);
+  (window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5050"
+    : "https://campuspulse-production-e334.up.railway.app");
 
 const BASE_URL = `${BACKEND_URL}/api`;
 
