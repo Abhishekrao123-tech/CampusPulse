@@ -10,13 +10,21 @@ const smtpUser = process.env.SMTP_USER;
 
 if (smtpHost && smtpUser) {
   transporter = nodemailer.createTransport({
-    host: smtpHost,
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    auth: {
-      user: smtpUser,
-      pass: process.env.SMTP_PASS
-    }
-  });
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: true,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
+  }
+});
+  transporter.verify((err, success) => {
+  if (err) {
+    console.error("SMTP VERIFY ERROR:", err);
+  } else {
+    console.log("✅ SMTP READY");
+  }
+});
   console.log('✉️ SMTP Mail Transport Initialized');
 } else {
   console.log('⚠️ SMTP host/credentials not provided. Email notifications will fall back to logging in the console.');
