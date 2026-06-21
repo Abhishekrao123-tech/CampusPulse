@@ -1329,13 +1329,9 @@ select.input-field option { background: var(--clr-surface2); }
 .auth-switch { text-align: center; margin-top: 16px; font-size: 0.875rem; color: var(--clr-text-muted); }
 .link-text { color: var(--clr-purple-l); font-weight: 600; }
 .link-text:hover { color: var(--clr-purple); }
-.demo-creds {
-  margin-top: 16px; padding: 12px; border-radius: var(--r-sm);
-  background: rgba(168,85,247,.07); border: 1px solid var(--clr-border);
-  font-size: 0.78rem; color: var(--clr-text-muted);
+.demo-creds:empty {
+    display: none;
 }
-.demo-creds code { color: var(--clr-purple-l); font-family: monospace; }
-
 /* Delete modal */
 .delete-icon { font-size: 3rem; margin-bottom: 12px; }
 
