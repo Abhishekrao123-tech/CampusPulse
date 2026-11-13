@@ -1,5 +1,5 @@
-const nodemailer = require('nodemailer');
-const dotenv = require('dotenv');
+const nodemailer = require("nodemailer");
+const dotenv = require("dotenv");
 
 dotenv.config();
 
@@ -10,39 +10,46 @@ const smtpUser = process.env.SMTP_USER;
 
 if (smtpHost && smtpUser) {
   transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: true,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
-});
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
   transporter.verify((err, success) => {
-  if (err) {
-    console.error("SMTP VERIFY ERROR:", err);
-  } else {
-    console.log("✅ SMTP READY");
-  }
-});
-  console.log('✉️ SMTP Mail Transport Initialized');
+    if (err) {
+      console.error("SMTP VERIFY ERROR:", err);
+    } else {
+      console.log("✅ SMTP READY");
+    }
+  });
+  console.log("✉️ SMTP Mail Transport Initialized");
 } else {
-  console.log('⚠️ SMTP host/credentials not provided. Email notifications will fall back to logging in the console.');
+  console.log(
+    "⚠️ SMTP host/credentials not provided. Email notifications will fall back to logging in the console.",
+  );
 }
 
 const sendMail = async (options) => {
   const mailOptions = {
-    from: process.env.FROM_EMAIL || 'noreply@campuspulse.edu',
+    from: process.env.FROM_EMAIL || "noreply@campuspulse.edu",
     to: options.to,
     subject: options.subject,
     html: options.html,
-    attachments: options.attachments || []
+    attachments: options.attachments || [],
   };
 
   if (transporter) {
     try {
       await transporter.sendMail(mailOptions);
-      console.log(`✉️ Email successfully sent to ${options.to}: ${options.subject}`);
+      console.log(
+        `✉️ Email successfully sent to ${options.to}: ${options.subject}`,
+      );
     } catch (err) {
       console.error(`❌ Error sending email to ${options.to}:`, err.message);
     }
@@ -52,13 +59,19 @@ const sendMail = async (options) => {
 To: ${options.to}
 Subject: ${options.subject}
 Content:
-${options.html.replace(/<[^>]*>/g, '\n')}
+${options.html.replace(/<[^>]*>/g, "\n")}
 ======================================================\n`);
   }
 };
 
 // 1. Send Registration Confirmation & Ticket with QR code
-exports.sendRegistrationEmail = async (userEmail, userName, eventTitle, ticketCode, qrCodeDataUrl) => {
+exports.sendRegistrationEmail = async (
+  userEmail,
+  userName,
+  eventTitle,
+  ticketCode,
+  qrCodeDataUrl,
+) => {
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #0a0a0f; color: #f1f0f5;">
       <h2 style="color: #a855f7; border-bottom: 2px solid #a855f7; padding-bottom: 10px;">⚡ CampusPulse Ticket</h2>
@@ -67,7 +80,7 @@ exports.sendRegistrationEmail = async (userEmail, userName, eventTitle, ticketCo
       <div style="background-color: #12121a; padding: 15px; border-radius: 6px; text-align: center; border: 1px solid #1a1a2e; margin: 20px 0;">
         <p style="font-size: 1.1rem; margin-top: 0; color: #c084fc;">Your Admission Ticket</p>
         <p style="font-size: 1.3rem; font-weight: bold; letter-spacing: 2px; color: #22c55e;">CODE: ${ticketCode}</p>
-        ${qrCodeDataUrl ? `<img src="${qrCodeDataUrl}" alt="QR Ticket" style="width: 150px; height: 150px; background-color: #fff; padding: 10px; border-radius: 6px;" />` : ''}
+        ${qrCodeDataUrl ? `<img src="${qrCodeDataUrl}" alt="QR Ticket" style="width: 150px; height: 150px; background-color: #fff; padding: 10px; border-radius: 6px;" />` : ""}
       </div>
       <p style="color: #9891b0; font-size: 0.85rem;">Please present this code/QR code at the venue for check-in and attendance marking. Enjoy the event!</p>
       <hr style="border: none; border-top: 1px solid #1a1a2e; margin: 20px 0;" />
@@ -78,31 +91,39 @@ exports.sendRegistrationEmail = async (userEmail, userName, eventTitle, ticketCo
   // Attach QR code image if it exists
   const attachments = [];
   let html = htmlContent;
-  
-  if (qrCodeDataUrl && qrCodeDataUrl.startsWith('data:image/png;base64,')) {
-    const base64Data = qrCodeDataUrl.replace(/^data:image\/png;base64,/, '');
+
+  if (qrCodeDataUrl && qrCodeDataUrl.startsWith("data:image/png;base64,")) {
+    const base64Data = qrCodeDataUrl.replace(/^data:image\/png;base64,/, "");
     attachments.push({
-      filename: 'ticket-qr.png',
-      content: Buffer.from(base64Data, 'base64'),
-      cid: 'ticketqr'
+      filename: "ticket-qr.png",
+      content: Buffer.from(base64Data, "base64"),
+      cid: "ticketqr",
     });
     // Replace src with CID reference so it embeds in standard email clients
-    html = htmlContent.replace(/src="data:image\/png;base64,[^"]+"/, 'src="cid:ticketqr"');
+    html = htmlContent.replace(
+      /src="data:image\/png;base64,[^"]+"/,
+      'src="cid:ticketqr"',
+    );
   }
 
   await sendMail({
     to: userEmail,
     subject: `Registered: ${eventTitle} — CampusPulse`,
     html: html,
-    attachments
+    attachments,
   });
 };
 
 // 2. Send Event Updates Email
-exports.sendEventUpdateEmail = async (userEmail, userName, eventTitle, updates) => {
+exports.sendEventUpdateEmail = async (
+  userEmail,
+  userName,
+  eventTitle,
+  updates,
+) => {
   const updateList = Object.entries(updates)
     .map(([key, val]) => `<li><strong>${key}:</strong> ${val}</li>`)
-    .join('');
+    .join("");
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #0a0a0f; color: #f1f0f5;">
@@ -121,12 +142,16 @@ exports.sendEventUpdateEmail = async (userEmail, userName, eventTitle, updates) 
   await sendMail({
     to: userEmail,
     subject: `Update: Changes to ${eventTitle} — CampusPulse`,
-    html
+    html,
   });
 };
 
 // 3. Send Event Cancellation Email
-exports.sendEventCancellationEmail = async (userEmail, userName, eventTitle) => {
+exports.sendEventCancellationEmail = async (
+  userEmail,
+  userName,
+  eventTitle,
+) => {
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #0a0a0f; color: #f1f0f5;">
       <h2 style="color: #ef4444; border-bottom: 2px solid #ef4444; padding-bottom: 10px;">⚠️ Event Cancelled</h2>
@@ -141,7 +166,7 @@ exports.sendEventCancellationEmail = async (userEmail, userName, eventTitle) => 
   await sendMail({
     to: userEmail,
     subject: `Cancelled: ${eventTitle} has been cancelled`,
-    html
+    html,
   });
 };
 
@@ -165,6 +190,6 @@ exports.sendResetPasswordEmail = async (userEmail, userName, resetLink) => {
   await sendMail({
     to: userEmail,
     subject: `Password Reset Request — CampusPulse`,
-    html
+    html,
   });
 };
