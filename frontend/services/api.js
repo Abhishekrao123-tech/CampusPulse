@@ -6,12 +6,20 @@
 
 "use strict";
 
-const BACKEND_URL =
-  localStorage.getItem("cp_backend_url") ||
-  (window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1"
-    ? "http://localhost:5050"
-    : "https://campuspulse-production-e334.up.railway.app");
+let BACKEND_URL = localStorage.getItem("cp_backend_url");
+
+if (!BACKEND_URL) {
+  BACKEND_URL =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1"
+      ? "http://localhost:5050"
+      : "https://campuspulse-production-e334.up.railway.app";
+}
+
+BACKEND_URL = BACKEND_URL.trim();
+if (!BACKEND_URL.startsWith("http://") && !BACKEND_URL.startsWith("https://")) {
+  BACKEND_URL = "https://" + BACKEND_URL;
+}
 
 const BASE_URL = `${BACKEND_URL}/api`;
 
